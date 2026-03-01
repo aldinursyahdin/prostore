@@ -50,7 +50,6 @@ const UserButton = async () => {
               </div>
             </div>
           </DropdownMenuLabel>
-
           <DropdownMenuItem>
             <Link href='/user/profile' className='w-full'>
               User Profile
@@ -61,7 +60,8 @@ const UserButton = async () => {
               Order History
             </Link>
           </DropdownMenuItem>
-
+          
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           {(session?.user as any)?.role === 'admin' && (
             <DropdownMenuItem>
               <Link href='/admin/overview' className='w-full'>
@@ -69,7 +69,6 @@ const UserButton = async () => {
               </Link>
             </DropdownMenuItem>
           )}
-
           <DropdownMenuItem className='p-0 mb-1'>
             <form action={signOutUser} className='w-full'>
               <Button
