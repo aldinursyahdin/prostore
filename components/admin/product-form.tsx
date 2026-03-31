@@ -1,12 +1,16 @@
 'use client';
 
-import { useToast } from '@/hooks/use-toast';
 import { productDefaultValues } from '@/lib/constants';
-import { insertProductSchema, updateProductSchema } from '@/lib/validators';
+import { insertProductSchema } from '@/lib/validators';
 import { Product } from '@/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
-import { ControllerRenderProps, SubmitHandler, useForm } from 'react-hook-form';
+import {
+  ControllerRenderProps,
+  Resolver,
+  SubmitHandler,
+  useForm,
+} from 'react-hook-form';
 import { z } from 'zod';
 import {
   Form,
@@ -21,10 +25,15 @@ import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Textarea } from '../ui/textarea';
 import { createProduct, updateProduct } from '@/lib/actions/product.actions';
-import { UploadButton } from '@/lib/uploadthing';
 import { Card, CardContent } from '../ui/card';
 import Image from 'next/image';
 import { Checkbox } from '../ui/checkbox';
+import { toast } from 'sonner';
+import { UploadButton } from '@/lib/uploadthing';
+
+type ProductFormValues = Omit<z.input<typeof insertProductSchema>, 'stock'> & {
+  stock: number;
+};
 
 const ProductForm = ({
   type,
@@ -36,33 +45,22 @@ const ProductForm = ({
   productId?: string;
 }) => {
   const router = useRouter();
-  const { toast } = useToast();
 
-  const form = useForm<z.infer<typeof insertProductSchema>>({
-    resolver:
-      type === 'Update'
-        ? zodResolver(updateProductSchema)
-        : zodResolver(insertProductSchema),
+  const form = useForm<ProductFormValues>({
+    resolver: zodResolver(insertProductSchema) as Resolver<ProductFormValues>,
     defaultValues:
       product && type === 'Update' ? product : productDefaultValues,
   });
 
-  const onSubmit: SubmitHandler<z.infer<typeof insertProductSchema>> = async (
-    values,
-  ) => {
+  const onSubmit: SubmitHandler<ProductFormValues> = async (values) => {
     // On Create
     if (type === 'Create') {
       const res = await createProduct(values);
 
       if (!res.success) {
-        toast({
-          variant: 'destructive',
-          description: res.message,
-        });
+        toast.error(res.message);
       } else {
-        toast({
-          description: res.message,
-        });
+        toast.success(res.message);
         router.push('/admin/products');
       }
     }
@@ -77,14 +75,9 @@ const ProductForm = ({
       const res = await updateProduct({ ...values, id: productId });
 
       if (!res.success) {
-        toast({
-          variant: 'destructive',
-          description: res.message,
-        });
+        toast.error(res.message);
       } else {
-        toast({
-          description: res.message,
-        });
+        toast.success(res.message);
         router.push('/admin/products');
       }
     }
@@ -109,10 +102,7 @@ const ProductForm = ({
             render={({
               field,
             }: {
-              field: ControllerRenderProps<
-                z.infer<typeof insertProductSchema>,
-                'name'
-              >;
+              field: ControllerRenderProps<ProductFormValues, 'name'>;
             }) => (
               <FormItem className='w-full'>
                 <FormLabel>Name</FormLabel>
@@ -130,10 +120,7 @@ const ProductForm = ({
             render={({
               field,
             }: {
-              field: ControllerRenderProps<
-                z.infer<typeof insertProductSchema>,
-                'slug'
-              >;
+              field: ControllerRenderProps<ProductFormValues, 'slug'>;
             }) => (
               <FormItem className='w-full'>
                 <FormLabel>Name</FormLabel>
@@ -167,10 +154,7 @@ const ProductForm = ({
             render={({
               field,
             }: {
-              field: ControllerRenderProps<
-                z.infer<typeof insertProductSchema>,
-                'category'
-              >;
+              field: ControllerRenderProps<ProductFormValues, 'category'>;
             }) => (
               <FormItem className='w-full'>
                 <FormLabel>Category</FormLabel>
@@ -188,10 +172,7 @@ const ProductForm = ({
             render={({
               field,
             }: {
-              field: ControllerRenderProps<
-                z.infer<typeof insertProductSchema>,
-                'brand'
-              >;
+              field: ControllerRenderProps<ProductFormValues, 'brand'>;
             }) => (
               <FormItem className='w-full'>
                 <FormLabel>Brand</FormLabel>
@@ -211,10 +192,7 @@ const ProductForm = ({
             render={({
               field,
             }: {
-              field: ControllerRenderProps<
-                z.infer<typeof insertProductSchema>,
-                'price'
-              >;
+              field: ControllerRenderProps<ProductFormValues, 'price'>;
             }) => (
               <FormItem className='w-full'>
                 <FormLabel>Price</FormLabel>
@@ -232,10 +210,7 @@ const ProductForm = ({
             render={({
               field,
             }: {
-              field: ControllerRenderProps<
-                z.infer<typeof insertProductSchema>,
-                'stock'
-              >;
+              field: ControllerRenderProps<ProductFormValues, 'stock'>;
             }) => (
               <FormItem className='w-full'>
                 <FormLabel>Stock</FormLabel>
@@ -275,10 +250,7 @@ const ProductForm = ({
                             form.setValue('images', [...images, res[0].url]);
                           }}
                           onUploadError={(error: Error) => {
-                            toast({
-                              variant: 'destructive',
-                              description: `ERROR! ${error.message}`,
-                            });
+                            toast.error(`ERROR! ${error.message}`);
                           }}
                         />
                       </FormControl>
@@ -327,10 +299,7 @@ const ProductForm = ({
                     form.setValue('banner', res[0].url);
                   }}
                   onUploadError={(error: Error) => {
-                    toast({
-                      variant: 'destructive',
-                      description: `ERROR! ${error.message}`,
-                    });
+                    toast.error(`ERROR! ${error.message}`);
                   }}
                 />
               )}
@@ -345,10 +314,7 @@ const ProductForm = ({
             render={({
               field,
             }: {
-              field: ControllerRenderProps<
-                z.infer<typeof insertProductSchema>,
-                'description'
-              >;
+              field: ControllerRenderProps<ProductFormValues, 'description'>;
             }) => (
               <FormItem className='w-full'>
                 <FormLabel>Description</FormLabel>

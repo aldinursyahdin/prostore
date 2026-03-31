@@ -11,8 +11,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import Pagination from '@/components/shared/pagination';
-import DeleteDialog from '@/components/shared/delete-dialog';
 import { requireAdmin } from '@/lib/auth-guard';
+import DeleteDialog from '@/components/shared/delete-dialog';
 
 const AdminProductsPage = async (props: {
   searchParams: Promise<{
